@@ -52,10 +52,19 @@
                             <tbody>
                             @foreach ($absences as $absence)
                                 <tr>
+                                    <?php
+                                        $tahun_ajaran = DB::table('t_tahun_ajaran')
+                                                ->where('kd_tahun_ajaran',$absence->kd_tahun_ajaran)
+                                                ->first();
+                                    ?>
                                     <td>{{$absence->hari}}</td>
                                     <td>{{$absence->tanggal}}</td>
-                                    <td>{{$absence->kd_tahun_ajaran}}</td>
-                                    <td>{{$absence->kd_periode_belajar}}</td>
+                                    <td>{{$tahun_ajaran->tahun_ajaran}}</td>
+                                    @if($absence->kd_periode_belajar=='1')
+                                        <td>Ganjil</td>
+                                    @else
+                                        <td>Genap</td>
+                                    @endif
                                     <td>{{$absence->jam_datang}}</td>
                                     <td>{{$absence->menit_kesiangan}}</td>
                                     <td>{{$absence->keterangan}}</td>

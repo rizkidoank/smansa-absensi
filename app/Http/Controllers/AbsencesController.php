@@ -14,7 +14,11 @@ class AbsencesController extends Controller
 {
     public function getHome(){
         Date::setLocale('id');
-        return view('home');
+        $date = Date::now();
+        $pikets = \DB::table('t_piket')->where('hari',$date->format('l'))->first();
+        $piket = \DB::table('t_guru')->where('kd_guru',$pikets->kd_guru)->first();
+        $jam_masuk = Date::createFromFormat('H:i:s',$pikets->jam_masuk,Date::now()->tzName)->toTimeString();
+        return view('home',compact('jam_masuk'));
     }
 
     public function postHome(Request $request){
@@ -25,65 +29,66 @@ class AbsencesController extends Controller
     }
 
     public function getInsert(){
-        if(Input::old('tanggal')!="" and Input::old('nis')!="") {
-            $siswa = \DB::table('t_siswa')->where('nis',Input::old('nis'));
-            if($siswa->count()==0)
+        //if(Input::old('tanggal')!="" and Input::old('nis')!="") {
+            $siswa = \DB::table('t_siswa_tingkat')->where('nis', Input::old('nis'))->first();
+
+            if($siswa==null){
+                \Session::flash('siswa_ilang','NIS tidak ditemukan');
                 return redirect('/home');
-            else
-                $siswa=$siswa->first();
-            $date = Date::createFromFormat('Y-m-d',Input::old('tanggal'));
-            if($date->month>=1 and $date->month<=6) {
-                $siswa_tingkat = \DB::table('t_siswa_tingkat')
-                    ->where('nis', Input::old('nis'))
-                    ->where('kd_tahun_ajaran',20)
-                    ->where('kd_periode_belajar',2)
-                    ->first();
-                $kd_tahun_ajaran = '20';
-                $kd_periode_belajar = '2';
-            } else{
-                $siswa_tingkat = \DB::table('t_siswa_tingkat')
-                    ->where('nis', Input::old('nis'))
-                    ->where('kd_tahun_ajaran',21)
-                    ->where('kd_periode_belajar',1)
-                    ->first();
-                $kd_tahun_ajaran = '21';
-                $kd_periode_belajar = '1';
             }
+            $date = Date::createFromFormat('Y-m-d',Input::old('tanggal'));
+            $tapel = AbsencesController::checkPeriode($date);
+            $tapel['kd_tapel']= \DB::table('t_tahun_ajaran')
+                ->where('tahun_ajaran',$tapel['tahun_ajaran'])
+                ->first()->kd_tahun_ajaran;
+            $siswa_tingkat = \DB::table('t_siswa_tingkat')
+                    ->where('nis',$siswa->nis)
+                    ->where('kd_tahun_ajaran',$tapel['kd_tapel'])
+                    ->where('kd_periode_belajar',$tapel['periode'])->first();
+            if($siswa_tingkat==null){
+                \Session::flash('tahun_ajaran','Tahun ajaran belum dimulai');
+                return redirect('/home');
+            }
+            $siswa = \DB::table('t_siswa')->where('nis',$siswa->nis)->first();
             $pikets = \DB::table('t_piket')->where('hari',$date->format('l'))->first();
             $piket = \DB::table('t_guru')->where('kd_guru',$pikets->kd_guru)->first();
             $jam_masuk = Date::createFromFormat('H:i:s',$pikets->jam_masuk,Date::now()->tzName);
+
             return view('absences.insert',compact(
                 'date',
                 'jam_masuk',
                 'siswa',
                 'siswa_tingkat',
                 'piket',
-                'kd_tahun_ajaran',
-                'kd_periode_belajar'
+                'tapel'
             ));
-        }
-        else
-            return redirect('home');
+        //}
+        //else
+        //    return redirect('home');
     }
 
     public function postInsert(Request $request){
-        $this->validate($request,[
-            'ket'=>'required',
-        ]);
-        $absen = new Absence();
-        $piket = \DB::table('t_guru')->where('nama',$request->guru_piket)->first();
-        $absen->nis = $request->nis;
-        $absen->kd_tahun_ajaran = $request->kd_tahun_ajaran;
-        $absen->kd_periode_belajar = $request->kd_periode_belajar;
-        $absen->kd_rombel = $request->kelas;
-        $absen->hari = $request->hari;
-        $absen->tanggal = $request->tgl;
-        $absen->jam_datang = $request->jam_datang;
-        $absen->menit_kesiangan = $request->menit_kesiangan;
-        $absen->kd_piket = $piket->kd_guru;
-        $absen->keterangan = $request->ket;
-        $absen->save();
+        if($request->get('ket')!="") {
+            $absen = new Absence();
+            $piket = \DB::table('t_guru')->where('nama', $request->guru_piket)->first();
+            $absen->nis = $request->nis;
+            $absen->kd_tahun_ajaran = $request->kd_tahun_ajaran;
+            $absen->kd_periode_belajar = $request->kd_periode_belajar;
+            $absen->kd_rombel = $request->kelas;
+            $absen->hari = $request->hari;
+            $absen->tanggal = $request->tgl;
+            $absen->jam_datang = $request->jam_datang;
+            $absen->menit_kesiangan = $request->menit_kesiangan;
+            $absen->kd_piket = $piket->kd_guru;
+            $absen->keterangan = $request->ket;
+            $absen->save();
+            \Session::flash('success','Data berhasil ditambahkan');
+        }
+        else{
+            \Session::flash('error','Gagal tambah data, isi kolom keterangan');
+        }
         return redirect('home');
+
     }
 
     public function getConfig(){
@@ -103,5 +108,18 @@ class AbsencesController extends Controller
                 ]);
         }
         return redirect('/home/configuration');
+    }
+
+    public function checkPeriode(Date $date){
+        $month = $date->month;
+        $year = $date->year;
+        if($month >= 1 and $month <= 6)
+            return array(
+                'tahun_ajaran'=>strval($year-1)."/".strval($year),
+                'periode'=>'2');
+        else if($month > 6 and $month <= 12)
+            return array(
+                'tahun_ajaran'=>strval($year)."/".strval($year+1),
+                'periode'=>'1');
     }
 }

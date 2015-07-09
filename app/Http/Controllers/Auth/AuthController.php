@@ -85,6 +85,7 @@ class AuthController extends Controller
         $credentials = $this->getCredentials($request);
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
+            \Session::flash('login_flash','Login berhasil');
             return redirect()->intended();
         }
 

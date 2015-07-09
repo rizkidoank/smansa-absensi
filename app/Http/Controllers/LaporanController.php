@@ -8,14 +8,20 @@ use App\Http\Requests;
 use Illuminate\Support\Facades\Input;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Jenssegers\Date\Date;
 
 class LaporanController extends Controller
 {
     public function getIndex(){
         $absens = \DB::table('t_kesiangan')->get();
-        $tahun_ajaran = \DB::table('t_tahun_ajaran')->get();
         $kelas = \DB::table('t_siswa_tingkat')->distinct('kd_rombel')->orderBy('kd_rombel')->get(['kd_rombel']);
-        $headers = ['NIS','Nama','Kelas','Tahun Ajaran','Periode Belajar','Hari','Tanggal','Jam Datang','Menit Kesiangan','Piket','Keterangan'];
+        $headers = ['NIS','Nama','Kelas','Tahun Ajaran','Semester','Hari','Tanggal','Jam Datang','Menit Kesiangan','Piket','Keterangan'];
+        $date = Date::now();
+        $th1 = strval($date->year-1)."/".strval($date->year);
+        $th2 = strval($date->year)."/".strval($date->year+1);
+        $t1 = \DB::table('t_tahun_ajaran')->where('tahun_ajaran',$th1)->get();
+        $t2 = \DB::table('t_tahun_ajaran')->where('tahun_ajaran',$th2)->get();
+        $tahun_ajaran =(object) array_merge((array)$t1,(array)$t2);
         return view('laporan.index',compact('headers','absens','tahun_ajaran','kelas'));
     }
 
@@ -25,7 +31,7 @@ class LaporanController extends Controller
         $absences = \DB::table('t_kesiangan')->where('nis',$siswa->nis)->get();
 
         $sumMenit = 0;
-        $headers = ['Hari','Tanggal','Tahun Ajaran','Periode Belajar','Jam Datang','Menit Kesiangan','Keterangan'];
+        $headers = ['Hari','Tanggal','Tahun Ajaran','Semester','Jam Datang','Menit Kesiangan','Keterangan'];
         foreach ($absences as $absence){
             $sumMenit += $absence->menit_kesiangan;
         }
@@ -34,6 +40,10 @@ class LaporanController extends Controller
 
     public function exportLaporan(Request $request){
         $input = $request->all();
+        if($input['kd_periode_belajar']=='Ganjil')
+            $input['kd_periode_belajar']='1';
+        else
+            $input['kd_periode_belajar']='2';
         $headers = ['NIS','Nama','Kelas','Tahun Ajaran','Periode Belajar','Hari/Tanggal','Jam Datang','Menit Kesiangan','Piket','Keterangan'];
         $absences = \DB::table('t_kesiangan')
             ->where('tanggal','like',$input['tgl'].'%')
@@ -64,13 +74,16 @@ class LaporanController extends Controller
             })->export('xlsx');
         }
     }
-    public function getBanyak(){
-        $count = \DB::table('t_kesiangan')
-        ->select(\DB::raw('distinct `nis`'))->get();
-        
-        foreach ($count as $c) {
-            echo $c->nis." - ".\DB::table('t_kesiangan')->where('nis',$c->nis)->count()."\n\n";
-        }
-        return "END";
+    public function checkPeriode(Date $date){
+        $month = $date->month;
+        $year = $date->year;
+        if($month >= 1 and $month <= 6)
+            return array(
+                'tahun_ajaran'=>strval($year-1)."/".strval($year),
+                'periode'=>'2');
+        else if($month >= 6 and $month <= 12)
+            return array(
+                'tahun_ajaran'=>strval($year)."/".strval($year+1),
+                'periode'=>'1');
     }
 }

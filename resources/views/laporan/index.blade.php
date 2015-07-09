@@ -27,7 +27,7 @@
                     </div>
                     <div class="form-group col-sm-2">
                         <select name="kd_tahun_ajaran" id="tahunAjaranSearch" class="form-control">
-                            <option value="">Semua</option>
+                            <option value=""></option>
                             @foreach($tahun_ajaran as $thn)
                                 <option value="{{$thn->kd_tahun_ajaran}}">{{$thn->tahun_ajaran}}</option>
                             @endforeach
@@ -36,8 +36,8 @@
                     <div class="form-group col-sm-2">
                         <select name="kd_periode_belajar" id="periodeSearch" class="form-control">
                             <option value="">Semua</option>
-                            <option value="1">Ganjil</option>
-                            <option value="2">Genap</option>
+                            <option value="Ganjil">Ganjil</option>
+                            <option value="Genap">Genap</option>
                         </select>
                     </div>
                     <div class="form-group col-sm-2">
@@ -64,12 +64,17 @@
                                 <?php
                                 $siswa = DB::table('t_siswa')->where('nis',$absence->nis)->first();
                                 $guru = DB::table('t_guru')->where('kd_guru',$absence->kd_piket)->first();
+                                $tahun_ajaran = DB::table('t_tahun_ajaran')->where('kd_tahun_ajaran',$absence->kd_tahun_ajaran)->first();
                                 ?>
                                 <td><a href="/home/student/{{$absence->nis}}">{{$absence->nis}}</a></td>
                                 <td>{{$siswa->nama}}</td>
                                 <td>{{$absence->kd_rombel}}</td>
-                                <td>{{$absence->kd_tahun_ajaran}}</td>
-                                <td>{{$absence->kd_periode_belajar}}</td>
+                                <td>{{$tahun_ajaran->tahun_ajaran}}</td>
+                                @if($absence->kd_periode_belajar=='1')
+                                    <td>Ganjil</td>
+                                @else
+                                    <td>Genap</td>
+                                @endif
                                 <td>{{$absence->hari}}</td>
                                 <td>{{$absence->tanggal}}</td>
                                 <td>{{$absence->jam_datang}}</td>

@@ -49,11 +49,8 @@
                             <div class="form-group">
                                 {!! Form::label('hari',$p->hari,['class'=>'control-label col-md-2']) !!}
                                 <div class="col-md-5">
-                                    <div class='input-group date'>
-                                        <input name="{{'time'.$p->id}}" id={{'time'.$p->id}} type='text' class="form-control text-center" value="{{$p->jam_masuk}}"/>
-                                        <span class="input-group-addon">
-                                            :00
-                                        </span>
+                                    <div class='input-group date' id={{'time'.$p->id}}>
+                                        <input name="{{'time'.$p->id}}" type='text' class="form-control text-center" value="{{$p->jam_masuk}}"/>
                                         <span class="input-group-addon">
                                             <span class="glyphicon glyphicon-time"></span>
                                         </span>

@@ -2,9 +2,9 @@
 @section('content')
     @include('additional.navbar')
     <div class="container">
-        <div class="panel panel-default animated slideInDown">
+        <div class="panel panel-default animated fadeInDown">
             <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
+                <h3 class="panel-title">Tambah Catatan</h3>
             </div>
             <div class="panel-body">
                 @include('additional.errors')
@@ -43,11 +43,11 @@
                 </div>
                 <div class="form-group col-md-12">
                     {!! Form::label('ket','Keterangan (wajib diisi)',['class'=>'control-label']) !!}
-                    {!! Form::text('ket',"",['class'=>'form-control']) !!}
+                    {!! Form::text('ket',"",['class'=>'form-control','required'=>'true']) !!}
                 </div>
                 <div class="form-group col-md-12">
-                    {!! Form::hidden('kd_tahun_ajaran',$kd_tahun_ajaran) !!}
-                    {!! Form::hidden('kd_periode_belajar',$kd_periode_belajar) !!}
+                    {!! Form::hidden('kd_tahun_ajaran',$tapel['kd_tapel']) !!}
+                    {!! Form::hidden('kd_periode_belajar',$tapel['periode']) !!}
                     {!! Form::submit('Kirim',['class'=>'form-control btn btn-primary']) !!}
                 </div>
                 {!! Form::close() !!}

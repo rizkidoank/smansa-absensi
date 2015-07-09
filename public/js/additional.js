@@ -1,20 +1,18 @@
 $(document).ready(function(){
+    autoAlert(".alert",1500)
     if($("#navbar").length){
-        startTime();
+        if($("#timer").length){
+            waktu = document.getElementById("timer").innerHTML.split(':');
+            compare=new Date();
+            compare.setHours(waktu[0]);
+            compare.setMinutes(waktu[1]);
+            compare.setSeconds(waktu[2]);
+            startTime();
+        }
     }
+    resizeElements();
     $(window).on('resize',function(){
-        if($(window).width()<768){
-            $("#clock_nav").hide();
-            $("#clock").css({
-                fontSize:"32px"
-            })
-        }
-        else{
-            $("#clock_nav").show();
-            $("#clock").css({
-                fontSize:"64px"
-            })
-        }
+        resizeElements();
     });
     if(location.pathname == "/home/laporan"){
         $("#tgl").datepicker();
@@ -61,20 +59,18 @@ function startTime() {
     m = checkTime(m);
     s = checkTime(s);
 
-    var compare=new Date();
-    compare.setHours(6);
-    compare.setMinutes(30);
-    compare.setSeconds(00);
+    if(today>compare){
+        var difference = Math.abs(today - compare);
+        var minutes = Math.floor(difference/1000/60);
+    }
+    else{
+        var minutes = 0;
+    }
 
     document.getElementById('clock_nav').innerHTML = h+":"+m+":"+s;
     if($("#clock").length){
         document.getElementById('clock').innerHTML = h+":"+m+":"+s;
-        if(today>compare){
-            $('#clock').css({
-                color:"black",
-                textShadow:"0px 0px 15px white"
-            });
-        }
+        document.getElementById('timer').innerHTML = "Menit Kesiangan : " + minutes;
     }
 
     var t = setTimeout(function(){startTime()},500);
@@ -85,3 +81,22 @@ function checkTime(i) {
     return i;
 }
 
+function autoAlert(selector, delay) {
+    var elm = $(selector);
+    elm.fadeIn("slow").delay(delay).slideUp("slow")
+}
+
+function resizeElements(){
+    if($(window).width()<768){
+        $("#clock_nav").hide();
+        $("#clock").css({
+            fontSize:"32px"
+        })
+    }
+    else{
+        $("#clock_nav").show();
+        $("#clock").css({
+            fontSize:"64px"
+        })
+    }
+}
