@@ -8,7 +8,7 @@
             <span class="icon-bar"></span>
         </button>
         @endif
-        <a class="navbar-brand" href="{{url('/')}}"><span class="glyphicon glyphicon-calendar"></span></a>
+        {{-- <a class="navbar-brand" href="{{url('/')}}"><span class="glyphicon glyphicon-calendar"></span></a> --}}
     </div>
 
     @if(Auth::check())
