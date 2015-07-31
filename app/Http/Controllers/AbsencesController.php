@@ -93,7 +93,7 @@ class AbsencesController extends Controller
 
     public function getConfig(){
         $piket = \DB::table('t_piket')->orderBy('id','asc')->get();
-        $guru = \DB::table('t_guru')->where('status','1')->orderBy('kd_guru')->get();
+        $guru = \DB::table('t_guru')->where('status','1')->orderBy('nm')->get();
         return view('absences.config',compact('piket','guru'));
     }
 

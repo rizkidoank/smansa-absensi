@@ -23,7 +23,7 @@
                                 <tr>
                                     <td>{{$p->hari}}</td>
                                     <td>{{$p->jam_masuk}}</td>
-                                    <td>{{\DB::table('t_guru')->where('kd_guru',$p->kd_guru)->first()->nama}}</td>
+                                    <td>{{\DB::table('t_guru')->where('kd_guru',$p->kd_guru)->first()->nm}}</td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -60,9 +60,9 @@
                                     <select name="{{'guru'.$p->id}}" id="hari_{{$p->id}}" class="form-control">
                                         @foreach($guru as $g)
                                             @if($g->kd_guru == $p->kd_guru)
-                                                <option value="{{$g->kd_guru}}" selected>{{$g->nama}}</option>
+                                                <option value="{{$g->kd_guru}}" selected>{{$g->nm}}</option>
                                             @else
-                                                <option value="{{$g->kd_guru}}">{{$g->nama}}</option>
+                                                <option value="{{$g->kd_guru}}">{{$g->nm}}</option>
                                             @endif
                                         @endforeach
                                     </select>

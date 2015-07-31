@@ -29,7 +29,7 @@
                         <select name="kd_tahun_ajaran" id="tahunAjaranSearch" class="form-control">
                             <option value=""></option>
                             @foreach($tahun_ajaran as $thn)
-                                <option value="{{$thn->kd_tahun_ajaran}}">{{$thn->tahun_ajaran}}</option>
+                                <option value="{{$thn->tahun_ajaran}}">{{$thn->tahun_ajaran}}</option>
                             @endforeach
                         </select>
                     </div>

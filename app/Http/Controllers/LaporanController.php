@@ -40,10 +40,15 @@ class LaporanController extends Controller
 
     public function exportLaporan(Request $request){
         $input = $request->all();
+        if($input['kd_tahun_ajaran']!='')
+            $input['kd_tahun_ajaran'] = \DB::table('t_tahun_ajaran')->where('tahun_ajaran',$input['kd_tahun_ajaran'])->first()->kd_tahun_ajaran;
         if($input['kd_periode_belajar']=='Ganjil')
             $input['kd_periode_belajar']='1';
-        else
+        else if($input['kd_periode_belajar']=='Genap')
             $input['kd_periode_belajar']='2';
+        else
+            $input['kd_periode_belajar']='';
+
         $headers = ['NIS','Nama','Kelas','Tahun Ajaran','Periode Belajar','Hari/Tanggal','Jam Datang','Menit Kesiangan','Piket','Keterangan'];
         $absences = \DB::table('t_kesiangan')
             ->where('tanggal','like',$input['tgl'].'%')
